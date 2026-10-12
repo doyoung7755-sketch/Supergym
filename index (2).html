@@ -1,0 +1,1217 @@
+<title>슈퍼짐 루틴 메이커</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* ========================================================================
+   슈퍼짐 루틴 메이커 — 스타일 시트
+   토큰: 색상/타이포/레이아웃을 :root 커스텀 프로퍼티로 관리합니다.
+   ======================================================================== */
+:root{
+  --bg:#f4f3ef;
+  --surface:#ffffff;
+  --surface-2:#ebeae4;
+  --border:#d9d7cf;
+  --text:#1a1a1a;
+  --text-dim:#5c5a52;
+  --accent:#e8590c;
+  --accent-ink:#ffffff;
+  --accent-soft:#ffe8d9;
+  --good:#2f9e5e;
+  --good-soft:#e3f6ea;
+  --warn:#c98a00;
+  --warn-soft:#fff2d6;
+  --danger:#d33a3a;
+  --danger-soft:#fbe3e3;
+  --shadow:0 10px 30px -14px rgba(20,18,14,.35);
+  --radius:14px;
+  --font-display:'Black Han Sans','Noto Sans KR',sans-serif;
+  --font-body:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:'IBM Plex Mono','Noto Sans KR',monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141416;
+    --surface:#1d1e21;
+    --surface-2:#26272b;
+    --border:#35363b;
+    --text:#f2f1ec;
+    --text-dim:#a7a59c;
+    --accent:#ff7a29;
+    --accent-ink:#191008;
+    --accent-soft:#3a2415;
+    --good:#57c98a;
+    --good-soft:#173225;
+    --warn:#e6b143;
+    --warn-soft:#332608;
+    --danger:#ff6b6b;
+    --danger-soft:#3a1a1a;
+    --shadow:0 10px 30px -14px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141416;
+  --surface:#1d1e21;
+  --surface-2:#26272b;
+  --border:#35363b;
+  --text:#f2f1ec;
+  --text-dim:#a7a59c;
+  --accent:#ff7a29;
+  --accent-ink:#191008;
+  --accent-soft:#3a2415;
+  --good:#57c98a;
+  --good-soft:#173225;
+  --warn:#e6b143;
+  --warn-soft:#332608;
+  --danger:#ff6b6b;
+  --danger-soft:#3a1a1a;
+  --shadow:0 10px 30px -14px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;}
+[hidden]{display:none!important;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:400;letter-spacing:.01em;text-wrap:balance;margin:0;}
+p{margin:0;}
+button{font-family:inherit;}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+
+/* ---------- 레이아웃 뼈대 ---------- */
+#app{max-width:720px;margin:0 auto;padding:0 20px 64px;}
+.topbar{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;margin:0 -20px 8px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:20px;}
+.brand .mark{
+  width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-family:var(--font-mono);
+}
+.nav-links{display:flex;gap:6px;}
+.nav-links button{
+  border:1px solid var(--border);background:var(--surface);color:var(--text-dim);
+  padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;transition:.15s;
+}
+.nav-links button.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.nav-links button:hover{border-color:var(--accent);color:var(--text);}
+
+.screen{padding-top:8px;animation:fade .35s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion: reduce){.screen{animation:none;}}
+
+/* ---------- 시작 화면 ---------- */
+.hero{
+  padding:56px 0 28px;display:flex;flex-direction:column;gap:18px;
+}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;color:var(--accent);
+  font-family:var(--font-mono);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+}
+.hero .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.hero h1{font-size:44px;line-height:1.15;}
+.hero h1 .hl{color:var(--accent);}
+.hero p.lead{font-size:17px;color:var(--text-dim);max-width:46ch;}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.stat-pill{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:110px;flex:1 1 130px;
+}
+.stat-pill .n{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--accent);}
+.stat-pill .l{font-size:12.5px;color:var(--text-dim);}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:11px;padding:14px 22px;
+  font-size:15.5px;font-weight:700;font-family:var(--font-body);transition:.15s;line-height:1;
+}
+.btn-primary{background:var(--accent);color:var(--accent-ink);}
+.btn-primary:hover{filter:brightness(1.06);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{padding:9px 14px;font-size:13.5px;border-radius:9px;}
+.resume-card{
+  margin-top:26px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  box-shadow:var(--shadow);
+}
+.resume-card .rc-text{font-size:14px;color:var(--text-dim);}
+.resume-card .rc-text b{color:var(--text);}
+
+.safety-note{
+  margin-top:40px;border:1px solid var(--border);border-left:4px solid var(--warn);
+  background:var(--warn-soft);border-radius:10px;padding:16px 18px;font-size:13.5px;color:var(--text);
+}
+.safety-note h4{font-family:var(--font-body);font-size:13px;font-weight:700;margin-bottom:8px;color:var(--warn);text-transform:uppercase;letter-spacing:.04em;}
+.safety-note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;}
+
+/* ---------- 설문 화면 ---------- */
+.progress-wrap{margin:22px 0 26px;}
+.progress-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;font-family:var(--font-mono);}
+.progress-bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+.progress-bar>i{display:block;height:100%;background:var(--accent);border-radius:inherit;transition:width .3s ease;}
+
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px 22px;box-shadow:var(--shadow);}
+.q-block+.q-block{margin-top:26px;padding-top:26px;border-top:1px dashed var(--border);}
+.q-label{font-size:18px;font-weight:700;margin-bottom:4px;}
+.q-help{font-size:13px;color:var(--text-dim);margin-bottom:14px;}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;}
+.opt{
+  border:1.5px solid var(--border);background:var(--surface-2);border-radius:10px;
+  padding:12px 10px;text-align:center;cursor:pointer;font-size:14.5px;font-weight:500;
+  transition:.12s;user-select:none;
+}
+.opt:hover{border-color:var(--accent);}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;}
+.opt.sel::after{content:" ✓";}
+input.text-input{
+  width:100%;border:1.5px solid var(--border);background:var(--surface-2);border-radius:10px;
+  padding:12px 14px;font-size:15px;color:var(--text);font-family:inherit;
+}
+input.text-input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.step-nav{display:flex;justify-content:space-between;gap:10px;margin-top:24px;}
+
+/* ---------- 결과 화면 ---------- */
+.summary-card{
+  background:var(--text);color:var(--bg);border-radius:var(--radius);padding:24px 22px;
+  display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);
+}
+:root:not([data-theme="light"]) .summary-card, :root[data-theme="dark"] .summary-card{background:var(--accent-soft);color:var(--text);border:1px solid var(--border);}
+.summary-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.summary-top h2{font-size:26px;}
+.summary-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.badge{
+  font-family:var(--font-mono);font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;
+  background:rgba(255,255,255,.12);
+}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-top:2px;}
+.summary-grid .g{background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;}
+.summary-grid .g .v{font-family:var(--font-mono);font-size:19px;font-weight:600;}
+.summary-grid .g .k{font-size:12px;opacity:.75;}
+
+.day-tabs{display:flex;gap:7px;overflow-x:auto;padding:18px 0 4px;scrollbar-width:thin;}
+.day-tab{
+  flex:0 0 auto;border:1.5px solid var(--border);background:var(--surface);border-radius:10px;
+  padding:9px 15px;font-size:14px;font-weight:600;color:var(--text-dim);cursor:pointer;white-space:nowrap;
+}
+.day-tab.active{border-color:var(--accent);background:var(--accent);color:var(--accent-ink);}
+
+.day-panel{display:flex;flex-direction:column;gap:16px;margin-top:6px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px 20px;}
+.card h3{font-size:15px;font-family:var(--font-body);font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.card h3 .tag{
+  font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--surface-2);color:var(--text-dim);padding:3px 8px;border-radius:99px;
+}
+.card p.note{font-size:13.5px;color:var(--text-dim);}
+
+table.ex-table{width:100%;border-collapse:collapse;font-size:14px;}
+table.ex-table th{
+  text-align:left;font-size:11.5px;color:var(--text-dim);font-weight:600;text-transform:uppercase;
+  letter-spacing:.04em;padding:0 8px 8px;border-bottom:1px solid var(--border);
+}
+table.ex-table td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+table.ex-table tr:last-child td{border-bottom:none;}
+table.ex-table td.exname{font-weight:700;}
+table.ex-table td.exname .part{display:block;font-weight:400;font-size:12px;color:var(--text-dim);}
+table.ex-table td.numcell{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.sub-flag{
+  display:inline-block;margin-top:3px;font-size:11px;color:var(--danger);background:var(--danger-soft);
+  padding:2px 7px;border-radius:6px;
+}
+.hr-zone{
+  display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:var(--surface-2);border-radius:10px;
+  padding:12px 14px;margin-top:8px;
+}
+.hr-zone .z{font-family:var(--font-mono);font-size:22px;font-weight:600;color:var(--accent);}
+.hr-zone .zl{font-size:12px;color:var(--text-dim);}
+.stretch-list{display:flex;flex-wrap:wrap;gap:8px;}
+.stretch-chip{background:var(--surface-2);border-radius:8px;padding:7px 11px;font-size:13px;}
+.prog-list{display:flex;flex-direction:column;gap:8px;}
+.prog-row{display:flex;gap:12px;align-items:baseline;}
+.prog-row .wk{font-family:var(--font-mono);font-weight:700;color:var(--accent);min-width:52px;}
+.trainer-box{
+  background:var(--surface-2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
+  padding:14px 16px;font-size:14.5px;line-height:1.65;
+}
+.trainer-box .who{font-size:12px;color:var(--text-dim);margin-bottom:6px;font-family:var(--font-mono);}
+
+.result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+
+/* ---------- 운동 사전 ---------- */
+.dict-filter{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 16px;}
+.dict-filter button{
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text-dim);
+  padding:7px 13px;border-radius:999px;font-size:13px;cursor:pointer;
+}
+.dict-filter button.active{background:var(--text);border-color:var(--text);color:var(--bg);}
+.dict-search{width:100%;margin-bottom:14px;}
+.dict-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.dict-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 15px;}
+.dict-item .dn{font-weight:700;font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+.dict-item .dn .lvl{font-family:var(--font-mono);font-size:10.5px;color:var(--text-dim);}
+.dict-item .dp{font-size:12px;color:var(--accent);margin:3px 0 8px;font-weight:600;}
+.dict-item .dd{font-size:13.5px;color:var(--text);margin-bottom:6px;}
+.dict-item .dc{font-size:12.5px;color:var(--danger);}
+.dict-item .dc b{font-weight:700;}
+.dict-empty{color:var(--text-dim);font-size:14px;padding:30px 0;text-align:center;}
+
+.footer-space{height:20px;}
+
+/* ---------- 인쇄 스타일 (A4) ---------- */
+@media print{
+  body{background:#fff;color:#000;font-size:11.5px;}
+  .topbar,.nav-links,.day-tabs,.result-actions,.hero,.progress-wrap,.dict-filter,.dict-search{display:none!important;}
+  #app{max-width:100%;padding:0;}
+  .day-panel[data-print-hide]{display:none!important;}
+  .card{border:1px solid #999;box-shadow:none;break-inside:avoid;padding:10px 12px;margin-bottom:8px;}
+  .summary-card{background:#fff!important;color:#000!important;border:1px solid #000;}
+  .summary-grid .g,.badge{background:#f0f0f0!important;color:#000!important;}
+  table.ex-table th,table.ex-table td{border-color:#ccc;color:#000;}
+  .trainer-box{background:#f6f6f6;border-left-color:#000;}
+  .safety-note{background:#fff;border-color:#000;}
+  @page{size:A4;margin:14mm;}
+}
+</style>
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand"><span class="mark">SG</span>슈퍼짐 루틴 메이커</div>
+    <div class="nav-links" id="navLinks" hidden>
+      <button data-nav="result">내 루틴</button>
+      <button data-nav="dict">운동 사전</button>
+    </div>
+  </div>
+
+  <!-- 시작 화면 -->
+  <section class="screen" id="screen-start">
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>SUPERGYM ROUTINE MAKER</span>
+      <h1>나에게 맞는<br><span class="hl">운동 루틴</span>, 1분이면<br>충분합니다</h1>
+      <p class="lead">슈퍼짐에 실제로 있는 기구와 운동만으로 구성된 맞춤 루틴을 받아보세요. 목표와 경력, 통증 부위까지 반영해서 안전하게 설계해 드립니다.</p>
+      <div class="stat-row">
+        <div class="stat-pill"><span class="n num">83</span><span class="l">등록 운동 종목</span></div>
+        <div class="stat-pill"><span class="n num">4</span><span class="l">주 프로그레션</span></div>
+        <div class="stat-pill"><span class="n num">10</span><span class="l">개 맞춤 문항</span></div>
+      </div>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="btnStart">루틴 만들기 시작</button>
+        <button class="btn btn-ghost" id="btnDictFromHome">운동 사전 보기</button>
+      </div>
+      <div class="resume-card" id="resumeCard" hidden>
+        <div class="rc-text">저장된 루틴이 있습니다. <b id="resumeName"></b>님의 루틴을 이어서 볼까요?</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" id="btnResume">이어서 보기</button>
+          <button class="btn btn-ghost btn-sm" id="btnResumeClear">새로 만들기</button>
+        </div>
+      </div>
+    </div>
+    <div class="safety-note">
+      <h4>안전 안내</h4>
+      <ul>
+        <li>본 루틴은 일반적인 운동 가이드이며, 개인의 건강 상태에 따라 조정이 필요합니다.</li>
+        <li>운동 중 통증이나 어지러움이 느껴지면 즉시 중단하고 트레이너에게 알려 주세요.</li>
+        <li>질환이 있거나 최근 수술·부상 이력이 있는 경우 의료 전문가와 상담 후 진행해 주세요.</li>
+        <li>정확한 자세가 가장 중요합니다. 처음 하는 기구는 트레이너에게 문의해 주세요.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 설문 화면 -->
+  <section class="screen" id="screen-survey" hidden>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span id="progLabel">STEP 1 / 9</span><span id="progPercent">11%</span></div>
+      <div class="progress-bar"><i id="progFill" style="width:11%"></i></div>
+    </div>
+    <div class="q-card" id="qCard"></div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" id="btnPrev">이전</button>
+      <button class="btn btn-primary" id="btnNext">다음</button>
+    </div>
+  </section>
+
+  <!-- 결과 화면 -->
+  <section class="screen" id="screen-result" hidden>
+    <div id="resultSummary"></div>
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="dayPanels"></div>
+    <div class="card" style="margin-top:16px;">
+      <h3><span class="tag">4WEEK</span>4주 프로그레션 안내</h3>
+      <div class="prog-list">
+        <div class="prog-row"><span class="wk num">1주차</span><span>자세 익히기 — 가벼운 무게로 시작하고, 세트 수는 표에 적힌 그대로 진행해 주세요.</span></div>
+        <div class="prog-row"><span class="wk num">2주차</span><span>무게를 5~10% 늘려 보세요. 마지막 2~3회가 살짝 힘들게 느껴지는 정도가 적당합니다.</span></div>
+        <div class="prog-row"><span class="wk num">3주차</span><span>각 운동의 마지막 세트를 1세트 추가해서 진행해 주세요.</span></div>
+        <div class="prog-row"><span class="wk num">4주차</span><span>무게를 5% 정도 더 늘리고 그대로 유지하거나, 컨디션에 따라 가볍게 디로드해 주세요.</span></div>
+      </div>
+    </div>
+    <div class="card" id="trainerCard" style="margin-top:16px;">
+      <h3><span class="tag">COMMENT</span>트레이너 코멘트</h3>
+      <div class="trainer-box"><div class="who">슈퍼짐 마스터 트레이너</div><p id="trainerText"></p></div>
+    </div>
+    <div class="safety-note" style="margin-top:16px;">
+      <h4>안전 안내</h4>
+      <ul>
+        <li>본 루틴은 일반적인 운동 가이드이며, 개인의 건강 상태에 따라 조정이 필요합니다.</li>
+        <li>운동 중 통증이나 어지러움이 느껴지면 즉시 중단하고 트레이너에게 알려 주세요.</li>
+        <li>질환이 있거나 최근 수술·부상 이력이 있는 경우 의료 전문가와 상담 후 진행해 주세요.</li>
+        <li>정확한 자세가 가장 중요합니다. 처음 하는 기구는 트레이너에게 문의해 주세요.</li>
+      </ul>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btnPrint">인쇄 / PDF 저장</button>
+      <button class="btn btn-ghost" id="btnPT">PT 상담 문의</button>
+      <button class="btn btn-ghost" id="btnRestart">처음부터 다시하기</button>
+    </div>
+  </section>
+
+  <!-- 운동 사전 화면 -->
+  <section class="screen" id="screen-dict" hidden>
+    <div style="padding-top:18px;">
+      <h2 style="font-size:26px;">운동 사전</h2>
+      <p class="q-help" style="margin-top:6px;">슈퍼짐에 있는 전체 83개 운동을 부위별로 확인해 보세요.</p>
+    </div>
+    <input class="text-input dict-search" id="dictSearch" placeholder="운동 이름으로 검색…">
+    <div class="dict-filter" id="dictFilter"></div>
+    <div class="dict-grid" id="dictGrid"></div>
+  </section>
+</div>
+
+<script>
+/* ============================================================================
+   슈퍼짐 루틴 메이커 — 로직
+   아래 LOGIC 구간은 DOM에 의존하지 않는 순수 데이터/함수로만 구성되어 있어
+   콘솔이나 별도 테스트 스크립트에서 그대로 불러와 검증할 수 있습니다.
+   ==LOGIC-START== */
+
+// ---------------------------------------------------------------------------
+// 1. 운동 데이터베이스 (총 83종: 머신 40 + 프리웨이트·맨몸 38 + 유산소 5)
+//    groups  : 루틴 분할 시 부위 매칭에 사용하는 태그(복수 가능)
+//    level   : 초급 / 중급 / 고급
+//    type    : machine / dumbbell / barbell / cable / bodyweight / cardio
+//    desc    : 운동사전용 한 줄 설명
+//    caution : 운동사전용 핵심 주의점 1가지
+// ---------------------------------------------------------------------------
+const EXERCISE_DB = [
+  // ---- 머신 : 가슴 ----
+  {name:"인클라인 체스트", groups:["가슴"], part:"윗가슴", level:"초급", type:"machine", desc:"상단 가슴을 집중적으로 밀어주는 머신 운동입니다.", caution:"손잡이를 너무 높이 잡으면 어깨에 부담이 갈 수 있어요."},
+  {name:"헴머 인클라인 프레스", groups:["가슴"], part:"윗가슴", level:"초급", type:"machine", desc:"좌우 독립 손잡이로 윗가슴을 미는 머신 운동입니다.", caution:"양팔 힘의 균형을 맞춰서 밀어 주세요."},
+  {name:"체스트 프레스", groups:["가슴"], part:"가슴 전체", level:"초급", type:"machine", desc:"가슴 전체를 고르게 자극하는 기본 밀기 운동입니다.", caution:"어깨가 으쓱 올라가지 않도록 내려 주세요."},
+  {name:"플라이", groups:["가슴"], part:"가슴", level:"초급", type:"machine", desc:"팔을 모으며 가슴 안쪽을 조이는 운동입니다.", caution:"팔꿈치를 완전히 펴지 말고 살짝 굽혀 주세요."},
+  {name:"딥 어시스트", groups:["가슴"], part:"아랫가슴", level:"초급", type:"machine", desc:"보조 기구로 딥스 동작을 익히는 아랫가슴 운동입니다.", caution:"상체를 살짝 앞으로 기울여야 가슴에 자극이 갑니다."},
+  {name:"헴머 디클라인 프레스", groups:["가슴"], part:"아랫가슴", level:"초급", type:"machine", desc:"아랫가슴을 미는 각도로 자극하는 머신 운동입니다.", caution:"손목을 꺾지 말고 일직선을 유지해 주세요."},
+  // ---- 머신 : 등 ----
+  {name:"렛풀다운", groups:["등"], part:"등", level:"초급", type:"machine", desc:"바를 아래로 당기며 등 넓은근을 발달시키는 운동입니다.", caution:"몸을 뒤로 너무 젖히지 말고 가슴을 펴고 당겨 주세요."},
+  {name:"롱 풀", groups:["등"], part:"등", level:"초급", type:"machine", desc:"긴 손잡이를 몸쪽으로 당기는 등 운동입니다.", caution:"허리를 과도하게 뒤로 젖히지 않도록 합니다."},
+  {name:"시티드 로우", groups:["등"], part:"등", level:"초급", type:"machine", desc:"앉은 자세로 손잡이를 당겨 등 중앙을 자극합니다.", caution:"어깨가 아닌 팔꿈치로 당긴다는 느낌을 유지하세요."},
+  {name:"와이드 풀다운 리어", groups:["등"], part:"등", level:"초급", type:"machine", desc:"넓은 그립으로 목 뒤 방향으로 당기는 등 운동입니다.", caution:"어깨 가동범위가 좁다면 무리해서 당기지 마세요."},
+  {name:"헴머 와이드 풀다운", groups:["등"], part:"등", level:"초급", type:"machine", desc:"좌우 독립 손잡이로 등 상부를 넓게 자극합니다.", caution:"당길 때 반동을 사용하지 않도록 주의하세요."},
+  {name:"헴머 로우", groups:["등"], part:"등", level:"초급", type:"machine", desc:"가슴을 지지하고 당기는 등 두께 운동입니다.", caution:"허리 힘이 아닌 등 힘으로 당겨 주세요."},
+  {name:"T 로우", groups:["등"], part:"등", level:"중급", type:"machine", desc:"상체를 숙인 자세로 당겨 등 두께를 키우는 운동입니다.", caution:"허리가 둥글게 말리지 않도록 코어에 힘을 주세요."},
+  {name:"친업 어시스트", groups:["등"], part:"등", level:"중급", type:"machine", desc:"보조 무게로 턱걸이 동작을 연습하는 운동입니다.", caution:"어깨가 귀 쪽으로 올라붙지 않게 내려서 시작하세요."},
+  // ---- 머신 : 어깨 ----
+  {name:"숄더 프레스", groups:["어깨"], part:"어깨", level:"초급", type:"machine", desc:"어깨를 위로 밀어 올리는 기본 머신 운동입니다.", caution:"손잡이를 눈높이보다 너무 낮게 잡지 마세요."},
+  {name:"오버헤드 프레스", groups:["어깨"], part:"어깨", level:"초급", type:"machine", desc:"머리 위로 무게를 미는 어깨 전면 운동입니다.", caution:"허리를 과도하게 젖히지 않도록 복부에 힘을 주세요."},
+  {name:"헴머 레터럴 레이즈", groups:["어깨"], part:"어깨 측면", level:"초급", type:"machine", desc:"팔을 옆으로 들어 어깨 측면을 넓히는 운동입니다.", caution:"어깨보다 높이 들지 말고 옆선까지만 올리세요."},
+  {name:"리어 델토이드", groups:["어깨"], part:"어깨 후면", level:"초급", type:"machine", desc:"팔을 뒤로 벌려 어깨 뒷면을 자극하는 운동입니다.", caution:"등이 아닌 어깨 뒤쪽에 힘이 들어가는지 확인하세요."},
+  // ---- 머신 : 팔 ----
+  {name:"시티드 암 컬", groups:["이두"], part:"이두", level:"초급", type:"machine", desc:"앉은 자세로 팔을 굽혀 이두를 고립 자극합니다.", caution:"팔꿈치를 패드에서 떼지 않도록 고정하세요."},
+  {name:"트라이셉스 프레스", groups:["삼두"], part:"삼두", level:"초급", type:"machine", desc:"팔을 펴며 삼두를 자극하는 머신 운동입니다.", caution:"팔꿈치를 몸통에 붙인 채로 밀어 주세요."},
+  // ---- 머신 : 하체 ----
+  {name:"V 스쿼트", groups:["하체"], part:"하체", level:"초급", type:"machine", desc:"정해진 궤도를 따라 앉았다 일어서는 하체 복합 운동입니다.", caution:"무릎이 발끝을 과도하게 넘지 않도록 주의하세요."},
+  {name:"시티드 레그프레스", groups:["하체"], part:"하체", level:"초급", type:"machine", desc:"앉아서 발판을 밀어내는 대표적인 하체 운동입니다.", caution:"무릎을 완전히 펴서 잠그지 말고 살짝 남겨 두세요."},
+  {name:"파워 레그 프레스", groups:["하체"], part:"하체", level:"중급", type:"machine", desc:"더 큰 중량을 다룰 수 있는 하체 밀기 운동입니다.", caution:"허리가 좌석에서 뜨지 않도록 밀착시켜 주세요."},
+  {name:"벨트 스쿼트", groups:["하체"], part:"하체", level:"중급", type:"machine", desc:"허리에 벨트를 걸어 척추 부담 없이 스쿼트하는 운동입니다.", caution:"상체를 곧게 세운 채로 앉았다 일어나세요."},
+  {name:"레그 익스텐션", groups:["하체"], part:"대퇴사두", level:"초급", type:"machine", desc:"무릎을 펴며 허벅지 앞쪽을 고립 자극합니다.", caution:"반동 없이 천천히 펴고 천천히 내려 주세요."},
+  {name:"라잉 레그컬", groups:["하체"], part:"햄스트링", level:"초급", type:"machine", desc:"엎드려 무릎을 굽히며 허벅지 뒤쪽을 자극합니다.", caution:"골반이 패드에서 뜨지 않도록 눌러 주세요."},
+  // ---- 머신 : 힙 ----
+  {name:"힙 어브덕션", groups:["힙"], part:"엉덩이", level:"초급", type:"machine", desc:"다리를 바깥으로 벌려 엉덩이 옆쪽을 자극합니다.", caution:"상체를 좌우로 흔들지 말고 고정하세요."},
+  {name:"힙 어덕션", groups:["힙"], part:"허벅지 안쪽", level:"초급", type:"machine", desc:"다리를 모으며 허벅지 안쪽을 자극하는 운동입니다.", caution:"무리한 중량보다 조이는 느낌에 집중하세요."},
+  {name:"글루트 드라이브", groups:["힙"], part:"힙", level:"초급", type:"machine", desc:"엉덩이를 뒤로 밀어내며 힙업 효과를 주는 운동입니다.", caution:"허리로 밀지 말고 엉덩이 힘으로 밀어 주세요."},
+  {name:"스탠딩 힙 쓰러스트", groups:["힙"], part:"힙", level:"초급", type:"machine", desc:"선 자세에서 엉덩이를 뒤로 차올리는 운동입니다.", caution:"상체가 과도하게 앞으로 쏠리지 않게 하세요."},
+  {name:"스탠딩 아웃타이", groups:["힙"], part:"힙", level:"초급", type:"machine", desc:"선 자세로 다리를 옆으로 벌리는 힙 운동입니다.", caution:"발끝 방향과 무릎 방향을 일치시켜 주세요."},
+  // ---- 머신 : 허리·코어 ----
+  {name:"백 익스텐션", groups:["허리"], part:"둔근·허리", level:"초급", type:"machine", desc:"상체를 세우며 허리와 엉덩이를 자극하는 운동입니다.", caution:"허리를 과신전하지 말고 일직선까지만 세우세요."},
+  {name:"하이퍼 익스텐션", groups:["허리"], part:"허리", level:"초급", type:"machine", desc:"엎드린 자세에서 상체를 들어 허리 근육을 강화합니다.", caution:"반동을 쓰지 말고 천천히 컨트롤하세요."},
+  {name:"로타리토르소 머신", groups:["복근"], part:"복부(회전)", level:"초급", type:"machine", desc:"상체를 좌우로 회전시켜 복사근을 자극합니다.", caution:"회전 범위를 무리하게 늘리지 마세요."},
+  {name:"CK코스터", groups:["복근"], part:"복근", level:"초급", type:"machine", desc:"상체를 말아 올리며 복근을 압축하는 머신 운동입니다.", caution:"목에 힘이 들어가지 않도록 시선을 아래로 유지하세요."},
+  {name:"업 도미널", groups:["복근"], part:"복근", level:"초급", type:"machine", desc:"상체를 접으며 복부를 압축하는 크런치형 운동입니다.", caution:"팔 힘이 아닌 복근 힘으로 접어 주세요."},
+  {name:"싯업", groups:["복근"], part:"복근", level:"초급", type:"machine", desc:"상체를 완전히 일으키는 대표적인 복근 운동입니다.", caution:"목을 당기지 말고 복부 힘으로 일어나세요."},
+  {name:"레그레이즈", groups:["복근"], part:"하복부", level:"초급", type:"machine", desc:"다리를 들어 올려 하복부를 자극하는 운동입니다.", caution:"허리가 과도하게 뜨지 않도록 골반을 고정하세요."},
+  {name:"버티컬 벤치 레그레이즈", groups:["복근"], part:"하복부", level:"중급", type:"machine", desc:"팔로 몸을 지지한 채 다리를 들어올리는 운동입니다.", caution:"몸이 앞뒤로 흔들리지 않게 코어를 잡아 주세요."},
+  // ---- 머신 : 전신 ----
+  {name:"머신 데드리프트", groups:["전신","등","하체"], part:"전신", level:"중급", type:"machine", desc:"정해진 궤도로 데드리프트 동작을 안전하게 연습하는 운동입니다.", caution:"허리를 둥글게 말지 말고 곧게 편 채로 당기세요."},
+
+  // ---- 프리웨이트·맨몸 : 하체 ----
+  {name:"맨몸 스쿼트", groups:["하체"], part:"하체", level:"초급", type:"bodyweight", desc:"체중만으로 앉았다 일어서는 기본 하체 운동입니다.", caution:"무릎과 발끝 방향을 같은 쪽으로 맞춰 주세요."},
+  {name:"와이드 스쿼트", groups:["하체"], part:"하체", level:"초급", type:"bodyweight", desc:"다리를 넓게 벌려 허벅지 안쪽까지 자극하는 스쿼트입니다.", caution:"무릎이 안쪽으로 모이지 않도록 주의하세요."},
+  {name:"힙브릿지", groups:["하체","힙"], part:"하체·힙", level:"초급", type:"bodyweight", desc:"누운 자세에서 엉덩이를 들어올리는 힙 운동입니다.", caution:"허리로 밀지 말고 엉덩이를 조이며 들어 올리세요."},
+  {name:"고블릿 스쿼트", groups:["하체"], part:"하체", level:"초급", type:"dumbbell", desc:"덤벨을 가슴 앞에 들고 수행하는 스쿼트입니다.", caution:"덤벨 무게에 상체가 앞으로 쏠리지 않게 하세요."},
+  {name:"스플릿 스쿼트", groups:["하체"], part:"하체", level:"초급", type:"bodyweight", desc:"한쪽 다리를 뒤로 뻗고 앉았다 일어나는 운동입니다.", caution:"앞무릎이 발끝을 크게 넘지 않도록 하세요."},
+  {name:"덤벨 스플릿 스쿼트", groups:["하체"], part:"하체", level:"중급", type:"dumbbell", desc:"덤벨을 들고 진행하는 스플릿 스쿼트입니다.", caution:"균형을 잃지 않도록 보폭을 안정적으로 잡으세요."},
+  {name:"덤벨 불가리안 스플릿 스쿼트", groups:["하체"], part:"하체", level:"중급", type:"dumbbell", desc:"뒷발을 벤치에 올리고 진행하는 하체 고강도 운동입니다.", caution:"무릎에 통증이 있다면 가동범위를 줄여 주세요."},
+  {name:"바벨 스쿼트", groups:["하체"], part:"하체", level:"고급", type:"barbell", desc:"바벨을 짊어지고 앉았다 일어서는 하체 대표 복합 운동입니다.", caution:"반드시 정확한 자세를 트레이너에게 확인받고 시작하세요."},
+  // ---- 프리웨이트 : 등 ----
+  {name:"덤벨로우", groups:["등"], part:"등", level:"초급", type:"dumbbell", desc:"상체를 숙이고 덤벨을 당겨 등을 자극하는 운동입니다.", caution:"허리가 말리지 않도록 상체 각도를 유지하세요."},
+  {name:"원암 덤벨로우", groups:["등"], part:"등", level:"초급", type:"dumbbell", desc:"한 손씩 번갈아 당기며 등을 자극하는 운동입니다.", caution:"몸통이 좌우로 돌아가지 않도록 고정하세요."},
+  {name:"케이블 와이드 암풀다운", groups:["등"], part:"등", level:"초급", type:"cable", desc:"케이블을 넓게 잡고 당기는 등 운동입니다.", caution:"어깨가 아닌 등 힘으로 당기는 느낌을 유지하세요."},
+  {name:"바벨로우", groups:["등"], part:"등", level:"중급", type:"barbell", desc:"상체를 숙이고 바벨을 당겨 등 전체를 자극합니다.", caution:"허리를 평평하게 유지한 채로 당겨 주세요."},
+  {name:"굿모닝", groups:["등","허리"], part:"등·허리", level:"고급", type:"barbell", desc:"바벨을 짊어지고 상체를 숙였다 세우는 허리 강화 운동입니다.", caution:"허리를 절대 둥글게 말지 말고 곧게 유지하세요."},
+  {name:"데드리프트", groups:["등","하체","전신"], part:"등·전신", level:"고급", type:"barbell", desc:"바닥의 바벨을 들어 올리는 전신 복합 운동입니다.", caution:"허리가 아닌 하체와 엉덩이 힘으로 들어 올리세요."},
+  // ---- 프리웨이트 : 어깨 ----
+  {name:"사이드 레터럴 레이즈", groups:["어깨"], part:"어깨 측면", level:"초급", type:"dumbbell", desc:"덤벨을 옆으로 들어 어깨 측면을 자극합니다.", caution:"어깨보다 높이 들지 말고 반동을 쓰지 마세요."},
+  {name:"프론트 레이즈", groups:["어깨"], part:"어깨 전면", level:"초급", type:"dumbbell", desc:"덤벨을 앞으로 들어 어깨 전면을 자극합니다.", caution:"허리를 뒤로 젖히지 말고 천천히 들어 올리세요."},
+  {name:"벤트 오버 레이즈", groups:["어깨"], part:"어깨 후면", level:"초급", type:"dumbbell", desc:"상체를 숙이고 덤벨을 벌려 어깨 후면을 자극합니다.", caution:"허리를 곧게 편 채로 동작해 주세요."},
+  {name:"케이블 페이스풀", groups:["어깨"], part:"어깨 후면", level:"초급", type:"cable", desc:"케이블을 얼굴 쪽으로 당겨 어깨 뒤와 상부 등을 자극합니다.", caution:"팔꿈치를 어깨보다 높게 당겨 주세요."},
+  {name:"덤벨 숄더 프레스", groups:["어깨"], part:"어깨", level:"중급", type:"dumbbell", desc:"덤벨을 머리 위로 미는 어깨 운동입니다.", caution:"허리를 과도하게 젖히지 않도록 복부에 힘을 주세요."},
+  // ---- 프리웨이트 : 가슴 ----
+  {name:"덤벨 벤치프레스", groups:["가슴"], part:"가슴", level:"중급", type:"dumbbell", desc:"벤치에 누워 덤벨을 미는 가슴 운동입니다.", caution:"어깨가 말리지 않도록 견갑골을 모아 주세요."},
+  {name:"인클라인 덤벨 벤치프레스", groups:["가슴"], part:"윗가슴", level:"중급", type:"dumbbell", desc:"상체를 세운 벤치에서 덤벨을 미는 윗가슴 운동입니다.", caution:"벤치 각도를 너무 높게 세우지 않도록 하세요."},
+  {name:"덤벨 플라이", groups:["가슴"], part:"가슴", level:"중급", type:"dumbbell", desc:"팔을 벌렸다 모으며 가슴을 조이는 운동입니다.", caution:"팔꿈치를 살짝 굽힌 채로 동작하세요."},
+  {name:"인클라인 덤벨 플라이", groups:["가슴"], part:"윗가슴", level:"중급", type:"dumbbell", desc:"상체를 세운 각도에서 진행하는 플라이 동작입니다.", caution:"어깨에 통증이 있다면 가동범위를 줄여 주세요."},
+  {name:"케이블 크로스오버", groups:["가슴"], part:"가슴", level:"초급", type:"cable", desc:"양쪽 케이블을 모아 가슴 안쪽을 조이는 운동입니다.", caution:"상체가 앞으로 쏠리지 않도록 중심을 잡으세요."},
+  {name:"벤치프레스", groups:["가슴"], part:"가슴", level:"고급", type:"barbell", desc:"바벨을 눕혀서 미는 가슴 대표 복합 운동입니다.", caution:"안전바 또는 보조자를 반드시 확인하고 진행하세요."},
+  // ---- 프리웨이트 : 이두 ----
+  {name:"덤벨컬", groups:["이두"], part:"이두", level:"초급", type:"dumbbell", desc:"덤벨을 굽혀 이두를 자극하는 기본 운동입니다.", caution:"팔꿈치가 앞뒤로 흔들리지 않게 고정하세요."},
+  {name:"헴머컬", groups:["이두"], part:"이두", level:"초급", type:"dumbbell", desc:"손바닥을 마주 본 채로 굽히는 이두 운동입니다.", caution:"손목을 곧게 편 상태로 굽혀 주세요."},
+  {name:"컨센트레이션 컬", groups:["이두"], part:"이두", level:"초급", type:"dumbbell", desc:"팔꿈치를 무릎에 고정하고 굽히는 이두 고립 운동입니다.", caution:"상체를 이용한 반동을 쓰지 마세요."},
+  {name:"케이블 암컬", groups:["이두"], part:"이두", level:"초급", type:"cable", desc:"케이블 저항으로 이두를 굽히는 운동입니다.", caution:"일정한 속도로 천천히 굽혔다 펴 주세요."},
+  {name:"바벨컬", groups:["이두"], part:"이두", level:"중급", type:"barbell", desc:"바벨을 양손으로 굽혀 이두를 자극합니다.", caution:"허리를 뒤로 젖히는 반동을 쓰지 마세요."},
+  // ---- 프리웨이트 : 삼두 ----
+  {name:"케이블 푸쉬다운", groups:["삼두"], part:"삼두", level:"초급", type:"cable", desc:"케이블을 아래로 밀어 삼두를 자극하는 운동입니다.", caution:"팔꿈치를 몸통에 고정한 채로 밀어 주세요."},
+  {name:"덤벨 킥백", groups:["삼두"], part:"삼두", level:"초급", type:"dumbbell", desc:"상체를 숙이고 팔을 뒤로 펴는 삼두 고립 운동입니다.", caution:"팔꿈치 위치를 고정하고 아래팔만 움직이세요."},
+  {name:"덤벨 오버헤드 익스텐션", groups:["삼두"], part:"삼두", level:"중급", type:"dumbbell", desc:"머리 위에서 팔을 굽혔다 펴는 삼두 운동입니다.", caution:"팔꿈치가 옆으로 벌어지지 않도록 고정하세요."},
+  {name:"라잉 트라이셉스 익스텐션", groups:["삼두"], part:"삼두", level:"중급", type:"barbell", desc:"누운 자세에서 바를 이마 쪽으로 내렸다 미는 운동입니다.", caution:"바가 얼굴 쪽으로 떨어지지 않도록 항상 주의하세요."},
+  // ---- 맨몸 : 복근 ----
+  {name:"플랭크", groups:["복근"], part:"복근", level:"초급", type:"bodyweight", desc:"팔뚝과 발끝으로 버티며 코어 전체를 강화하는 운동입니다.", caution:"엉덩이가 위로 뜨거나 아래로 처지지 않게 일직선을 유지하세요."},
+  {name:"사이드 플랭크", groups:["복근"], part:"복사근", level:"초급", type:"bodyweight", desc:"옆으로 누워 버티며 복사근을 강화하는 운동입니다.", caution:"어깨가 아래로 처지지 않도록 팔로 잘 지지해 주세요."},
+  {name:"바이시클 크런치", groups:["복근"], part:"복근", level:"초급", type:"bodyweight", desc:"양 팔꿈치와 반대쪽 무릎을 교차하며 복근을 자극합니다.", caution:"목을 손으로 잡아당기지 않도록 주의하세요."},
+  {name:"러시안 트위스트", groups:["복근"], part:"복사근", level:"중급", type:"bodyweight", desc:"상체를 좌우로 비틀며 복사근을 자극하는 운동입니다.", caution:"허리에 통증이 있다면 회전 범위를 줄여 주세요."},
+
+  // ---- 유산소 ----
+  {name:"런닝머신", groups:["유산소"], part:"유산소", level:"초급", type:"cardio", desc:"걷기부터 달리기까지 속도를 조절할 수 있는 유산소 기구입니다.", caution:"발판 손잡이 조작 전 속도를 반드시 확인하세요."},
+  {name:"스텝퍼", groups:["유산소"], part:"유산소", level:"초급", type:"cardio", desc:"제자리에서 계단을 오르는 동작으로 하체와 심폐를 함께 자극합니다.", caution:"상체를 숙이지 말고 곧게 세워 주세요."},
+  {name:"아크트레이너", groups:["유산소"], part:"유산소", level:"초급", type:"cardio", desc:"무릎 부담이 적은 타원형 궤도의 유산소 기구입니다.", caution:"손잡이에 체중을 과하게 싣지 않도록 하세요."},
+  {name:"싸이클", groups:["유산소"], part:"유산소", level:"초급", type:"cardio", desc:"앉은 자세로 페달을 밟는 관절 부담이 적은 유산소 기구입니다.", caution:"안장 높이를 무릎 각도에 맞게 조절해 주세요."},
+  {name:"스테어 클라이머", groups:["유산소"], part:"유산소", level:"중급", type:"cardio", desc:"실제 계단을 오르는 듯한 고강도 유산소 기구입니다.", caution:"난간에 의지하지 말고 다리 힘으로 오르세요."},
+];
+
+// 부위(group) 한글 표기를 사람이 읽기 좋은 라벨로 매핑 (표에 표시할 때 사용)
+const GROUP_LABEL = {
+  "가슴":"가슴","등":"등","어깨":"어깨","이두":"이두(팔)","삼두":"삼두(팔)","하체":"하체",
+  "힙":"힙","복근":"복근·코어","허리":"허리","전신":"전신","유산소":"유산소"
+};
+
+// ---------------------------------------------------------------------------
+// 2. 통증 부위별 제외 · 우선 대체 규칙
+// ---------------------------------------------------------------------------
+const PAIN_EXCLUDE = {
+  "허리": ["데드리프트","바벨로우","굿모닝","바벨 스쿼트","머신 데드리프트","러시안 트위스트"],
+  "무릎": ["바벨 스쿼트","V 스쿼트","스플릿 스쿼트","덤벨 스플릿 스쿼트","덤벨 불가리안 스플릿 스쿼트"],
+  "어깨": ["오버헤드 프레스","덤벨 숄더 프레스","벤치프레스","딥 어시스트"],
+  "손목": ["바벨컬","벤치프레스","플랭크"],
+  "목": ["싯업","바이시클 크런치","오버헤드 프레스"],
+};
+const PAIN_PREFER = { // 통증 시 우선적으로 추천할 대체 운동 (모두 DB에 존재)
+  "허리": ["시티드 레그프레스","헴머 로우","백 익스텐션","플랭크"],
+  "무릎": ["라잉 레그컬","레그 익스텐션","힙브릿지","글루트 드라이브"],
+  "어깨": ["숄더 프레스","케이블 페이스풀","리어 델토이드","체스트 프레스"],
+  "손목": ["헴머컬","체스트 프레스","케이블 푸쉬다운","레그레이즈"],
+  "목": ["CK코스터","레그레이즈","숄더 프레스"],
+};
+// 무릎 통증 시 사용할 수 없는 유산소 기구(충격이 큰 기구)
+const KNEE_UNSAFE_CARDIO = ["런닝머신","스텝퍼","스테어 클라이머"];
+
+function isExcludedByPain(exName, painAreas){
+  return painAreas.some(p => (PAIN_EXCLUDE[p]||[]).includes(exName));
+}
+function painPreferBonus(exName, painAreas){
+  let bonus = 0;
+  painAreas.forEach(p => { if((PAIN_PREFER[p]||[]).includes(exName)) bonus += 5; });
+  return bonus;
+}
+
+// ---------------------------------------------------------------------------
+// 3. 경력(레벨) 필터
+// ---------------------------------------------------------------------------
+function isAllowedByExperience(ex, experience){
+  if(experience === "입문"){
+    // 머신 80% 이상 / 초급 난이도만 / 바벨 절대 금지
+    return ex.level === "초급" && ex.type !== "barbell";
+  }
+  if(experience === "초급"){
+    // 머신 60~70% + 맨몸/덤벨 30~40%, 고급 제외, 바벨은 아직 이름
+    return ex.level !== "고급" && ex.type !== "barbell";
+  }
+  if(experience === "중급"){
+    return true; // 고급은 개수 제한을 별도로 적용
+  }
+  return true; // 상급
+}
+
+// ---------------------------------------------------------------------------
+// 4. 목표별 세트 · 횟수 · 휴식 · 강도
+// ---------------------------------------------------------------------------
+const GOAL_PRESCRIPTION = {
+  "체중 감량": {sets:3, reps:"15~20회", rest:"30~45초", rpe:"RPE 6~7"},
+  "근육 증가": {sets:4, reps:"8~12회", rest:"60~90초", rpe:"RPE 7~8"},
+  "체력 향상": {sets:3, reps:"12~15회", rest:"45~60초", rpe:"RPE 6~7"},
+  "바디라인 교정": {sets:3, reps:"15회", rest:"45초", rpe:"RPE 6~7"},
+  "건강 유지": {sets:3, reps:"12회", rest:"60초", rpe:"RPE 5~6"},
+};
+function getPrescription(goal, experience){
+  const base = GOAL_PRESCRIPTION[goal];
+  let sets = base.sets;
+  if(experience === "입문") sets = Math.max(2, sets - 1); // 입문자는 1세트 줄이고 횟수 유지
+  return {sets, reps:base.reps, rest:base.rest, rpe:base.rpe};
+}
+const CORE_PRESCRIPTION = {sets:2, reps:"15~20회 또는 30~60초 유지", rest:"30~45초", rpe:"RPE 6"};
+
+// ---------------------------------------------------------------------------
+// 5. 유산소 처방
+// ---------------------------------------------------------------------------
+const CARDIO_PLAN = {
+  "체중 감량": {min:"25~40분", low:0.60, high:0.70, priority:["런닝머신","아크트레이너","스테어 클라이머"], note:"웨이트 운동 후 중강도로 진행해 주세요."},
+  "근육 증가": {min:"15~20분", low:0.50, high:0.60, priority:["싸이클","런닝머신"], note:"웨이트 운동 후 저강도로 가볍게 진행해 주세요. (런닝머신은 걷기 속도)"},
+  "체력 향상": {min:"20~30분 (1분 빠르게 / 2분 천천히 × 8~10세트)", low:0.60, high:0.75, priority:["런닝머신","싸이클","아크트레이너"], note:"인터벌 방식으로 진행해 주세요."},
+  "바디라인 교정": {min:"20분", low:0.55, high:0.65, priority:["스텝퍼","아크트레이너","싸이클"], note:"저~중강도로 편안하게 진행해 주세요."},
+  "건강 유지": {min:"20분", low:0.55, high:0.65, priority:["스텝퍼","아크트레이너","싸이클"], note:"저~중강도로 편안하게 진행해 주세요."},
+};
+const AGE_MID = {"10대":15,"20대":25,"30대":35,"40대":45,"50대":55,"60대 이상":65};
+function pickCardioMachine(goal, painAreas){
+  const plan = CARDIO_PLAN[goal];
+  let candidates = plan.priority.slice();
+  if(painAreas.includes("무릎")){
+    candidates = candidates.filter(c => !KNEE_UNSAFE_CARDIO.includes(c));
+    if(candidates.length === 0) candidates = ["싸이클","아크트레이너"];
+  }
+  return candidates[0];
+}
+function buildCardioPrescription(goal, age, painAreas){
+  const plan = CARDIO_PLAN[goal];
+  const ageNum = AGE_MID[age] || 35;
+  const hrMax = 220 - ageNum;
+  const zoneLow = Math.round(hrMax * plan.low);
+  const zoneHigh = Math.round(hrMax * plan.high);
+  const machine = pickCardioMachine(goal, painAreas);
+  const kneeNote = painAreas.includes("무릎") ? " 무릎 통증을 고려해 충격이 적은 기구로 대체했습니다." : "";
+  return {machine, duration:plan.min, note:plan.note+kneeNote, hrMax, zoneLow, zoneHigh};
+}
+
+// ---------------------------------------------------------------------------
+// 6. 준비운동 / 마무리 스트레칭 안내
+// ---------------------------------------------------------------------------
+const STRETCH_BY_GROUP = {
+  "가슴":"가슴 스트레칭", "등":"등(광배) 스트레칭", "어깨":"어깨 스트레칭", "이두":"이두 스트레칭", "삼두":"삼두 스트레칭",
+  "하체":"허벅지 스트레칭", "힙":"둔근 스트레칭", "복근":"복부·허리 스트레칭", "허리":"허리 스트레칭", "전신":"전신 스트레칭"
+};
+function stretchListFor(groups){
+  const set = new Set();
+  groups.forEach(g => { if(STRETCH_BY_GROUP[g]) set.add(STRETCH_BY_GROUP[g]); });
+  if(set.size === 0) set.add("전신 스트레칭");
+  return Array.from(set);
+}
+
+// ---------------------------------------------------------------------------
+// 7. 주당 횟수 → 분할 정의
+// ---------------------------------------------------------------------------
+function buildSplit(freqNum, experience){
+  if(freqNum === 2){
+    return [
+      {label:"Day 1", title:"전신 A", groups:["가슴","등","하체","어깨"]},
+      {label:"Day 2", title:"전신 B", groups:["가슴","등","하체","어깨"]},
+    ];
+  }
+  if(freqNum === 3){
+    if(experience === "입문" || experience === "초급"){
+      return [
+        {label:"Day 1", title:"전신 A", groups:["가슴","등","하체","어깨"]},
+        {label:"Day 2", title:"전신 B", groups:["가슴","등","하체","힙"]},
+        {label:"Day 3", title:"전신 C", groups:["가슴","등","하체","어깨"]},
+      ];
+    }
+    return [
+      {label:"Day 1", title:"가슴 + 삼두", groups:["가슴","삼두"]},
+      {label:"Day 2", title:"등 + 이두", groups:["등","이두"]},
+      {label:"Day 3", title:"하체 + 어깨", groups:["하체","어깨"]},
+    ];
+  }
+  if(freqNum === 4){
+    return [
+      {label:"Day 1", title:"상체 A", groups:["가슴","등","어깨","이두","삼두"]},
+      {label:"Day 2", title:"하체 A", groups:["하체","힙"]},
+      {label:"Day 3", title:"상체 B", groups:["가슴","등","어깨","이두","삼두"]},
+      {label:"Day 4", title:"하체 B", groups:["하체","힙"]},
+    ];
+  }
+  if(freqNum === 5){
+    return [
+      {label:"Day 1", title:"가슴", groups:["가슴"]},
+      {label:"Day 2", title:"등", groups:["등"]},
+      {label:"Day 3", title:"하체", groups:["하체"]},
+      {label:"Day 4", title:"어깨 + 팔", groups:["어깨","이두","삼두"]},
+      {label:"Day 5", title:"힙 + 코어", groups:["힙"], coreBoost:true},
+    ];
+  }
+  // 6회 : 5분할 + 유산소·코어 데이
+  return [
+    {label:"Day 1", title:"가슴", groups:["가슴"]},
+    {label:"Day 2", title:"등", groups:["등"]},
+    {label:"Day 3", title:"하체", groups:["하체"]},
+    {label:"Day 4", title:"어깨 + 팔", groups:["어깨","이두","삼두"]},
+    {label:"Day 5", title:"힙 + 코어", groups:["힙"], coreBoost:true},
+    {label:"Day 6", title:"유산소 · 코어 집중일", groups:[], cardioDay:true},
+  ];
+}
+
+// 1회 운동시간 → 메인 운동 개수 / 코어 운동 개수
+function countsForDuration(durationMin, experience){
+  const table = {
+    30:{main:3, core:1}, 45:{main:4, core:1}, 60:{main:5, core:2}, 90:{main:7, core:2},
+  };
+  const c = table[durationMin] || table[60];
+  if(durationMin === 90 && (experience==="입문"||experience==="초급")) return {main:6, core:2};
+  return c;
+}
+
+// 경력 + 선호 방식(Q9) → 머신 비중 목표
+function machineRatioTarget(experience, style){
+  let base = {"입문":0.85, "초급":0.65, "중급":0.40, "상급":0.25}[experience];
+  if(style === "머신 위주") base = experience === "입문" ? 0.85 : 0.8;
+  if(style === "프리웨이트 위주") base = experience === "입문" ? 0.85 : 0.2; // 입문 바벨금지 규칙은 항상 우선
+  return base;
+}
+
+// ---------------------------------------------------------------------------
+// 8. 운동 선택 엔진
+//    ctx: {experience, painAreas, focusAreas, style, weeklyUsed:Set, advancedCount:{n}}
+// ---------------------------------------------------------------------------
+function scoreExercise(ex, ctx, focusAreas){
+  let score = 0;
+  if(focusAreas.some(f => ex.groups.includes(f))) score += 6; // 집중 부위 우선
+  score += painPreferBonus(ex.name, ctx.painAreas);            // 통증 대체 운동 우선
+  if(ctx.weeklyUsed.has(ex.name)) score -= 8;                  // 이미 이번 주에 쓴 운동은 후순위(완전 배제는 아님)
+  if(ex.level === "초급") score += 1;                          // 근소하게 안정적인 쪽 선호
+  return score;
+}
+
+function poolForGroups(groups, ctx){
+  return EXERCISE_DB.filter(ex => {
+    if(ex.type === "cardio") return false;
+    if(!ex.groups.some(g => groups.includes(g))) return false;
+    if(isExcludedByPain(ex.name, ctx.painAreas)) return false;
+    if(!isAllowedByExperience(ex, ctx.experience)) return false;
+    if(ex.level === "고급"){
+      if(ctx.experience === "중급" && ctx.advancedCount.n >= 2) return false;
+      if(ctx.experience === "입문" || ctx.experience === "초급") return false;
+    }
+    return true;
+  });
+}
+
+function pickMainExercises(groups, count, ctx, focusAreas){
+  const machineTarget = machineRatioTarget(ctx.experience, ctx.style);
+  const pool = poolForGroups(groups, ctx);
+  const picked = [];
+  const usedThisDay = new Set();
+  // 부위 순환: 요청된 그룹들을 고르게 돌아가며 슬롯을 채운다
+  let groupCursor = 0;
+  let safety = 0;
+  while(picked.length < count && safety < count * 40){
+    safety++;
+    const wantMachine = (picked.filter(p=>p.type==="machine").length) < Math.round((picked.length+1) * machineTarget);
+    const candidates = pool.filter(ex => !usedThisDay.has(ex.name));
+    // 부위 풀(예: 힙 전용 운동 6종)이 모두 소진되면, 같은 날 안에서는 절대
+    // 중복 출력하지 않도록 더 채우지 않고 그대로 종료합니다.
+    if(candidates.length === 0) break;
+    // 이번 슬롯이 원하는 타입(머신/프리웨이트)과 맞는 후보 우선
+    const typeMatch = candidates.filter(ex => (ex.type==="machine") === wantMachine);
+    const finalCandidates = typeMatch.length ? typeMatch : candidates;
+    finalCandidates.sort((a,b) => scoreExercise(b, ctx, focusAreas) - scoreExercise(a, ctx, focusAreas));
+    const chosen = finalCandidates[0];
+    picked.push(chosen);
+    usedThisDay.add(chosen.name);
+    ctx.weeklyUsed.add(chosen.name);
+    if(chosen.level === "고급") ctx.advancedCount.n++;
+    groupCursor++;
+  }
+  // 상급자는 프리웨이트 컴파운드를 앞쪽에, 머신은 마무리 고립 운동으로 배치
+  if(ctx.experience === "상급"){
+    const typeOrder = {barbell:0, dumbbell:1, cable:1, bodyweight:1, machine:2};
+    picked.sort((a,b) => typeOrder[a.type]-typeOrder[b.type]);
+  }
+  return picked;
+}
+
+function pickCoreExercises(count, ctx, focusAreas){
+  let pool = EXERCISE_DB.filter(ex => ex.groups.includes("복근"));
+  pool = pool.filter(ex => !isExcludedByPain(ex.name, ctx.painAreas) && isAllowedByExperience(ex, ctx.experience));
+  pool.sort((a,b) => scoreExercise(b, ctx, focusAreas) - scoreExercise(a, ctx, focusAreas));
+  const picked = [];
+  const used = new Set();
+  for(const ex of pool){
+    if(picked.length >= count) break;
+    if(used.has(ex.name)) continue;
+    picked.push(ex); used.add(ex.name);
+  }
+  return picked;
+}
+
+// ---------------------------------------------------------------------------
+// 9. 하루 루틴 생성
+// ---------------------------------------------------------------------------
+function generateDay(dayDef, state, ctx){
+  const {main:mainCount, core:coreCount} = countsForDuration(state.durationNum, state.experience);
+  const focusAreas = state.focus.includes("특별히 없음") ? [] : state.focus.flatMap(f => f === "팔" ? ["이두","삼두"] : [f]);
+  const rx = getPrescription(state.goal, state.experience);
+
+  if(dayDef.cardioDay){
+    const coreExs = pickCoreExercises(2, ctx, focusAreas).map(ex => ({ex, ...CORE_PRESCRIPTION}));
+    const cardio = buildCardioPrescription(state.goal, state.age, state.painAreas);
+    cardio.duration = "30~50분 (유산소 집중일)";
+    return {
+      ...dayDef, warmupMachine: pickCardioMachine(state.goal, state.painAreas),
+      main: [], core: coreExs, cardio,
+      stretch: stretchListFor(["복근","전신"]),
+      note: "오늘은 근력 운동 없이 유산소와 코어 위주로 컨디션을 회복하는 날입니다.",
+    };
+  }
+
+  const mainExs = pickMainExercises(dayDef.groups, mainCount, ctx, focusAreas)
+    .map(ex => ({ex, ...rx, substituted: painPreferBonus(ex.name, state.painAreas) > 0}));
+  const extraCore = dayDef.coreBoost ? coreCount + 1 : coreCount;
+  const coreExs = pickCoreExercises(extraCore, ctx, focusAreas).map(ex => ({ex, ...CORE_PRESCRIPTION}));
+  const cardio = buildCardioPrescription(state.goal, state.age, state.painAreas);
+  const warmupMachine = pickCardioMachine(state.goal, state.painAreas);
+  const stretch = stretchListFor(dayDef.groups.length ? dayDef.groups : ["전신"]);
+
+  return {...dayDef, warmupMachine, main: mainExs, core: coreExs, cardio, stretch, note: null};
+}
+
+// ---------------------------------------------------------------------------
+// 10. 전체 루틴 생성 (메인 엔트리)
+// ---------------------------------------------------------------------------
+function generateRoutine(state){
+  const freqNum = parseInt(state.freq, 10);
+  const durationNum = parseInt(state.duration, 10);
+  const s = {...state, freqNum, durationNum};
+  const split = buildSplit(freqNum, state.experience);
+  const ctx = {experience: state.experience, painAreas: state.painAreas, style: state.style, weeklyUsed: new Set(), advancedCount:{n:0}};
+  const days = split.map(d => generateDay(d, s, ctx));
+  const trainerComment = buildTrainerComment(state);
+  return {
+    days, trainerComment,
+    summary: {
+      name: state.name || "회원",
+      goal: state.goal, freq: state.freq, duration: state.duration,
+      experience: state.experience, style: state.style,
+      splitLabel: describeSplit(freqNum, state.experience),
+    }
+  };
+}
+
+function describeSplit(freqNum, experience){
+  if(freqNum === 2) return "무분할 (전신)";
+  if(freqNum === 3) return (experience==="입문"||experience==="초급") ? "무분할 (전신 A/B/C)" : "3분할";
+  if(freqNum === 4) return "2분할 × 2회전";
+  if(freqNum === 5) return "5분할";
+  return "5분할 + 유산소 집중일";
+}
+
+function buildTrainerComment(state){
+  const goalText = {
+    "체중 감량":"체지방을 효율적으로 줄이는 데 초점을 맞춰 구성했습니다. 유산소와 근력 운동을 꾸준히 병행하시면 좋은 변화를 느끼실 수 있을 거예요.",
+    "근육 증가":"근육 성장을 위해 세트당 자극을 충분히 느낄 수 있는 중량과 휴식 시간으로 구성했습니다. 식사와 휴식도 운동만큼 중요하다는 점 기억해 주세요.",
+    "체력 향상":"심폐지구력과 근지구력을 함께 끌어올릴 수 있도록 구성했습니다. 처음에는 힘들어도 꾸준히 하시면 체력이 눈에 띄게 좋아지실 거예요.",
+    "바디라인 교정":"자세와 라인 개선에 도움이 되는 힙·코어 운동을 중심으로 구성했습니다. 동작 하나하나 정확한 자세로 천천히 진행해 주세요.",
+    "건강 유지":"무리하지 않는 강도로 몸의 균형을 잡는 데 집중했습니다. 편안한 마음으로 루틴을 즐겨 주시면 좋겠습니다.",
+  }[state.goal] || "";
+  const expText = {
+    "입문":"처음이신 만큼 머신 위주의 쉬운 동작으로 구성했습니다. 자세가 익숙해질 때까지는 무게보다 정확한 동작에 집중해 주세요.",
+    "초급":"기본기를 다지는 단계인 만큼 머신과 프리웨이트를 균형 있게 섞어 구성했습니다.",
+    "중급":"프리웨이트 비중을 높여 근력 향상 효과를 극대화할 수 있도록 구성했습니다.",
+    "상급":"프리웨이트 복합 운동을 앞쪽에 배치해 고강도로 훈련할 수 있도록 구성했습니다. 세트 사이 회복에도 신경 써 주세요.",
+  }[state.experience] || "";
+  const painText = state.painAreas.length && !state.painAreas.includes("없음")
+    ? ` ${state.painAreas.join(", ")} 부위는 통증을 고려해 자극이 적은 운동으로 조정했으니 참고해 주세요.`
+    : "";
+  return `${goalText} ${expText}${painText}`;
+}
+
+/* ==LOGIC-END== */
+
+// ---------------------------------------------------------------------------
+// 11. 화면 상태 및 네비게이션 (DOM 의존 영역)
+// ---------------------------------------------------------------------------
+const STEPS = [
+  {id:"name_gender", fields:[
+    {type:"text", key:"name", label:"성함", help:"결과 화면에 표시됩니다. (선택 입력)"},
+    {type:"radio", key:"gender", label:"성별", options:["남","여"]},
+  ]},
+  {id:"age", fields:[{type:"radio", key:"age", label:"연령대", options:["10대","20대","30대","40대","50대","60대 이상"]}]},
+  {id:"experience", fields:[{type:"radio", key:"experience_raw", label:"운동 경력", options:["입문(3개월 미만)","초급(3~12개월)","중급(1~3년)","상급(3년 이상)"]}]},
+  {id:"goal", fields:[{type:"radio", key:"goal", label:"운동 목표", options:["체중 감량","근육 증가","체력 향상","바디라인 교정(힙업·자세)","건강 유지"]}]},
+  {id:"freq", fields:[{type:"radio", key:"freq_raw", label:"주당 운동 횟수", options:["2회","3회","4회","5회","6회"]}]},
+  {id:"duration", fields:[{type:"radio", key:"duration_raw", label:"1회 운동 시간", options:["30분","45분","60분","90분"]}]},
+  {id:"focus", fields:[{type:"checkbox", key:"focus", label:"집중하고 싶은 부위", help:"여러 개 선택 가능합니다.", options:["가슴","등","어깨","팔","하체","힙","복근","특별히 없음"]}]},
+  {id:"style", fields:[{type:"radio", key:"style", label:"선호 운동 방식", options:["머신 위주","프리웨이트 위주","머신+프리웨이트 혼합"]}]},
+  {id:"pain", fields:[{type:"checkbox", key:"pain", label:"불편하거나 통증 있는 부위", help:"여러 개 선택 가능합니다.", options:["허리","무릎","어깨","손목","목","없음"]}]},
+];
+
+let answers = {name:"", gender:"", age:"", experience_raw:"", goal:"", freq_raw:"", duration_raw:"", focus:[], style:"", pain:[]};
+let curStep = 0;
+let currentPlan = null;
+let activeDayIdx = 0;
+const STORE_KEY = "supergym_routine_v1";
+
+function normalizeState(){
+  return {
+    name: answers.name.trim(),
+    gender: answers.gender,
+    age: answers.age,
+    experience: (answers.experience_raw||"").replace(/\(.*\)/,""),
+    goal: answers.goal.replace(/\(.*\)/,""),
+    freq: (answers.freq_raw||"").replace("회",""),
+    duration: (answers.duration_raw||"").replace("분",""),
+    focus: answers.focus,
+    style: answers.style,
+    painAreas: answers.pain.includes("없음") || answers.pain.length===0 ? [] : answers.pain,
+  };
+}
+
+function stepValid(step){
+  return step.fields.every(f => {
+    if(f.type === "text") return true;
+    if(f.type === "checkbox") return true; // 체크박스는 선택 안 해도 다음 진행 허용(없음/특별히 없음 취지)
+    return !!answers[f.key];
+  });
+}
+
+function renderStep(){
+  const step = STEPS[curStep];
+  const card = document.getElementById("qCard");
+  card.innerHTML = "";
+  step.fields.forEach(f => {
+    const block = document.createElement("div");
+    block.className = "q-block";
+    const label = document.createElement("div");
+    label.className = "q-label";
+    label.textContent = f.label;
+    block.appendChild(label);
+    if(f.help){
+      const help = document.createElement("div");
+      help.className = "q-help";
+      help.textContent = f.help;
+      block.appendChild(help);
+    }
+    if(f.type === "text"){
+      const input = document.createElement("input");
+      input.type = "text"; input.className = "text-input"; input.id = "field_"+f.key;
+      input.value = answers[f.key] || "";
+      input.placeholder = "예: 홍길동";
+      input.addEventListener("input", e => { answers[f.key] = e.target.value; });
+      block.appendChild(input);
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "opt-grid";
+      f.options.forEach(opt => {
+        const el = document.createElement("div");
+        el.className = "opt";
+        el.textContent = opt;
+        const isSel = f.type === "checkbox" ? (answers[f.key]||[]).includes(opt) : answers[f.key] === opt;
+        if(isSel) el.classList.add("sel");
+        el.addEventListener("click", () => {
+          if(f.type === "checkbox"){
+            let arr = answers[f.key] || [];
+            if(opt === "없음" || opt === "특별히 없음"){
+              arr = arr.includes(opt) ? [] : [opt];
+            } else {
+              arr = arr.filter(a => a !== "없음" && a !== "특별히 없음");
+              arr = arr.includes(opt) ? arr.filter(a=>a!==opt) : [...arr, opt];
+            }
+            answers[f.key] = arr;
+          } else {
+            answers[f.key] = opt;
+          }
+          renderStep();
+        });
+        grid.appendChild(el);
+      });
+      block.appendChild(grid);
+    }
+    card.appendChild(block);
+  });
+  document.getElementById("progLabel").textContent = `STEP ${curStep+1} / ${STEPS.length}`;
+  const pct = Math.round(((curStep+1)/STEPS.length)*100);
+  document.getElementById("progPercent").textContent = pct+"%";
+  document.getElementById("progFill").style.width = pct+"%";
+  document.getElementById("btnPrev").style.visibility = curStep===0 ? "hidden" : "visible";
+  document.getElementById("btnNext").textContent = curStep===STEPS.length-1 ? "루틴 받기" : "다음";
+}
+
+function goStep(delta){
+  if(delta > 0 && !stepValid(STEPS[curStep])){
+    alert("항목을 선택해 주세요.");
+    return;
+  }
+  if(delta > 0 && curStep === STEPS.length-1){
+    finishSurvey();
+    return;
+  }
+  curStep += delta;
+  curStep = Math.max(0, Math.min(STEPS.length-1, curStep));
+  renderStep();
+}
+
+function finishSurvey(){
+  const state = normalizeState();
+  currentPlan = generateRoutine(state);
+  activeDayIdx = 0;
+  saveToStorage(state, currentPlan);
+  renderResult();
+  showScreen("result");
+}
+
+// ---------------------------------------------------------------------------
+// 12. 결과 화면 렌더링
+// ---------------------------------------------------------------------------
+function renderResult(){
+  const {summary, days, trainerComment} = currentPlan;
+  const sEl = document.getElementById("resultSummary");
+  sEl.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-top">
+        <h2>${escapeHtml(summary.name)}님의 맞춤 루틴</h2>
+        <div class="summary-badges">
+          <span class="badge">${escapeHtml(summary.experience)}</span>
+          <span class="badge">${escapeHtml(summary.style)}</span>
+        </div>
+      </div>
+      <div class="summary-grid">
+        <div class="g"><div class="v">${escapeHtml(summary.goal)}</div><div class="k">목표</div></div>
+        <div class="g"><div class="v">${escapeHtml(summary.splitLabel)}</div><div class="k">분할 방식</div></div>
+        <div class="g"><div class="v num">주 ${summary.freq}회</div><div class="k">운동 횟수</div></div>
+        <div class="g"><div class="v num">${summary.duration}분</div><div class="k">1회 운동 시간</div></div>
+      </div>
+    </div>`;
+
+  const tabs = document.getElementById("dayTabs");
+  tabs.innerHTML = "";
+  days.forEach((d,i) => {
+    const b = document.createElement("button");
+    b.className = "day-tab" + (i===activeDayIdx ? " active" : "");
+    b.textContent = `${d.label} · ${d.title}`;
+    b.addEventListener("click", () => { activeDayIdx = i; renderResult(); });
+    tabs.appendChild(b);
+  });
+
+  const panels = document.getElementById("dayPanels");
+  panels.innerHTML = "";
+  days.forEach((d,i) => {
+    const panel = document.createElement("div");
+    panel.className = "day-panel";
+    if(i !== activeDayIdx){ panel.setAttribute("data-print-hide",""); panel.hidden = true; }
+    panel.appendChild(renderDayContent(d));
+    panels.appendChild(panel);
+  });
+
+  document.getElementById("trainerText").textContent = trainerComment;
+}
+
+function renderDayContent(d){
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex"; wrap.style.flexDirection = "column"; wrap.style.gap = "14px";
+
+  const warm = document.createElement("div");
+  warm.className = "card";
+  warm.innerHTML = `<h3><span class="tag">WARM-UP</span>준비운동</h3>
+    <p class="note">${escapeHtml(d.warmupMachine)}에서 5~10분간 저강도로 몸을 가볍게 데워 주세요. 이어서 오늘 운동할 부위 위주로 동적 스트레칭(가볍게 움직이며 늘려주는 동작)을 함께 해 주시면 좋습니다.</p>`;
+  wrap.appendChild(warm);
+
+  if(d.note){
+    const noteCard = document.createElement("div");
+    noteCard.className = "card";
+    noteCard.innerHTML = `<h3><span class="tag">TODAY</span>${escapeHtml(d.title)}</h3><p class="note">${escapeHtml(d.note)}</p>`;
+    wrap.appendChild(noteCard);
+  }
+
+  if(d.main.length){
+    const main = document.createElement("div");
+    main.className = "card";
+    main.innerHTML = `<h3><span class="tag">MAIN</span>메인 운동</h3>` + buildExTable(d.main);
+    wrap.appendChild(main);
+  }
+
+  if(d.core.length){
+    const core = document.createElement("div");
+    core.className = "card";
+    core.innerHTML = `<h3><span class="tag">CORE</span>복근 · 코어</h3>` + buildExTable(d.core);
+    wrap.appendChild(core);
+  }
+
+  const cardio = document.createElement("div");
+  cardio.className = "card";
+  cardio.innerHTML = `<h3><span class="tag">CARDIO</span>유산소 처방</h3>
+    <p class="note"><b>${escapeHtml(d.cardio.machine)}</b> · ${escapeHtml(d.cardio.duration)}</p>
+    <p class="note">${escapeHtml(d.cardio.note)}</p>
+    <div class="hr-zone">
+      <div><div class="z num">${d.cardio.zoneLow}~${d.cardio.zoneHigh}</div><div class="zl">목표 심박수 (bpm)</div></div>
+      <div><div class="z num">${d.cardio.hrMax}</div><div class="zl">최대심박수(220-연령)</div></div>
+    </div>`;
+  wrap.appendChild(cardio);
+
+  const cd = document.createElement("div");
+  cd.className = "card";
+  cd.innerHTML = `<h3><span class="tag">COOL-DOWN</span>마무리 스트레칭</h3>
+    <div class="stretch-list">${d.stretch.map(s=>`<span class="stretch-chip">${escapeHtml(s)} 30초</span>`).join("")}</div>`;
+  wrap.appendChild(cd);
+
+  return wrap;
+}
+
+function buildExTable(rows){
+  const body = rows.map(r => `
+    <tr>
+      <td class="exname">${escapeHtml(r.ex.name)}<span class="part">${escapeHtml(r.ex.part)}</span>
+        ${r.substituted ? '<span class="sub-flag">통증 고려 대체</span>' : ""}</td>
+      <td class="numcell">${r.sets}세트 × ${escapeHtml(r.reps)}</td>
+      <td class="numcell">${escapeHtml(r.rest)}</td>
+      <td class="numcell">${escapeHtml(r.rpe)}</td>
+    </tr>`).join("");
+  return `<div style="overflow-x:auto;"><table class="ex-table">
+    <thead><tr><th>운동명 / 부위</th><th>세트×횟수</th><th>휴식</th><th>강도</th></tr></thead>
+    <tbody>${body}</tbody></table></div>`;
+}
+
+function escapeHtml(str){
+  return String(str==null?"":str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ---------------------------------------------------------------------------
+// 13. 운동 사전 화면
+// ---------------------------------------------------------------------------
+const DICT_FILTERS = ["전체","가슴","등","어깨","팔","하체","힙","복근","허리","전신","유산소"];
+let dictActiveFilter = "전체";
+let dictQuery = "";
+
+function renderDict(){
+  const filterWrap = document.getElementById("dictFilter");
+  filterWrap.innerHTML = "";
+  DICT_FILTERS.forEach(f => {
+    const b = document.createElement("button");
+    b.textContent = f;
+    if(f === dictActiveFilter) b.classList.add("active");
+    b.addEventListener("click", () => { dictActiveFilter = f; renderDict(); });
+    filterWrap.appendChild(b);
+  });
+
+  let list = EXERCISE_DB.slice();
+  if(dictActiveFilter !== "전체"){
+    list = list.filter(ex => {
+      if(dictActiveFilter === "팔") return ex.groups.includes("이두") || ex.groups.includes("삼두");
+      return ex.groups.includes(dictActiveFilter);
+    });
+  }
+  if(dictQuery.trim()){
+    const q = dictQuery.trim();
+    list = list.filter(ex => ex.name.includes(q));
+  }
+
+  const grid = document.getElementById("dictGrid");
+  if(list.length === 0){
+    grid.innerHTML = `<div class="dict-empty">검색 결과가 없습니다.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(ex => `
+    <div class="dict-item">
+      <div class="dn"><span>${escapeHtml(ex.name)}</span><span class="lvl">${ex.level}</span></div>
+      <div class="dp">${escapeHtml(ex.part)} · ${typeLabel(ex.type)}</div>
+      <div class="dd">${escapeHtml(ex.desc)}</div>
+      <div class="dc"><b>주의점</b> · ${escapeHtml(ex.caution)}</div>
+    </div>`).join("");
+}
+function typeLabel(t){
+  return {machine:"머신", dumbbell:"덤벨", barbell:"바벨", cable:"케이블", bodyweight:"맨몸", cardio:"유산소"}[t] || t;
+}
+
+// ---------------------------------------------------------------------------
+// 14. 화면 전환 / 로컬스토리지 / 초기화
+// ---------------------------------------------------------------------------
+function showScreen(name){
+  ["start","survey","result","dict"].forEach(s => {
+    document.getElementById("screen-"+s).hidden = (s !== name);
+  });
+  document.getElementById("navLinks").hidden = !currentPlan;
+  document.querySelectorAll("#navLinks button").forEach(b => {
+    b.classList.toggle("active", b.dataset.nav === name);
+  });
+  if(name === "dict") renderDict();
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function saveToStorage(state, plan){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({state, plan, savedAt: Date.now()}));
+  }catch(e){ /* 저장 실패 시에도 서비스는 계속 동작해야 하므로 무시합니다 */ }
+}
+function loadFromStorage(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+
+function initApp(){
+  document.getElementById("btnStart").addEventListener("click", () => {
+    answers = {name:"", gender:"", age:"", experience_raw:"", goal:"", freq_raw:"", duration_raw:"", focus:[], style:"", pain:[]};
+    curStep = 0; renderStep(); showScreen("survey");
+  });
+  document.getElementById("btnDictFromHome").addEventListener("click", () => showScreen("dict"));
+  document.getElementById("btnPrev").addEventListener("click", () => goStep(-1));
+  document.getElementById("btnNext").addEventListener("click", () => goStep(1));
+  document.getElementById("btnPrint").addEventListener("click", () => window.print());
+  document.getElementById("btnPT").addEventListener("click", () => {
+    alert("PT 상담 문의가 접수되었습니다. 데스크 또는 담당 트레이너가 곧 안내해 드릴 예정입니다.");
+  });
+  document.getElementById("btnRestart").addEventListener("click", () => {
+    answers = {name:"", gender:"", age:"", experience_raw:"", goal:"", freq_raw:"", duration_raw:"", focus:[], style:"", pain:[]};
+    curStep = 0; currentPlan = null; renderStep(); showScreen("survey");
+  });
+  document.querySelectorAll("#navLinks button").forEach(b => {
+    b.addEventListener("click", () => showScreen(b.dataset.nav));
+  });
+  document.getElementById("dictSearch").addEventListener("input", e => { dictQuery = e.target.value; renderDict(); });
+
+  const saved = loadFromStorage();
+  if(saved && saved.plan){
+    document.getElementById("resumeCard").hidden = false;
+    document.getElementById("resumeName").textContent = saved.plan.summary.name;
+    document.getElementById("btnResume").addEventListener("click", () => {
+      currentPlan = saved.plan; activeDayIdx = 0;
+      renderResult(); showScreen("result");
+    });
+    document.getElementById("btnResumeClear").addEventListener("click", () => {
+      try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+      document.getElementById("resumeCard").hidden = true;
+    });
+  }
+  renderStep();
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+</script>
